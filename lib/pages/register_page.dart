@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:realtimechat/helper/mostrar-alerta.dart';
+import 'package:realtimechat/services/auth_services.dart';
 import 'package:realtimechat/widgtes/btn_azul.dart';
 
 import 'package:realtimechat/widgtes/custom_input.dart';
@@ -53,6 +56,7 @@ class __FormState extends State<_Form> {
   final nombreCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authServices = Provider.of<AuthServices>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -76,14 +80,31 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BtnAzul(
-              text: 'Ingresar',
+              text: 'Crear cuenta',
               onPressed: () {
-                print(emailCtrl.text);
-                print(passwordCtrl.text);
-                print(nombreCtrl.text);
+                if (authServices.autenticando) {
+                  return null;
+                } else {
+                  getRegister(authServices);
+                }
               })
         ],
       ),
     );
+  }
+
+  getRegister(AuthServices authServices) async {
+    FocusScope.of(context).unfocus();
+
+    final resgiterOk = await authServices.register(nombreCtrl.text.trim(),
+        emailCtrl.text.trim(), passwordCtrl.text.trim());
+
+    if (resgiterOk == true) {
+      //anevag
+      Navigator.pushReplacementNamed(context, 'usuarios');
+    } else {
+      //mostrar alerta
+      mostrarAlert(context, 'Registro incorrecto', resgiterOk);
+    }
   }
 }

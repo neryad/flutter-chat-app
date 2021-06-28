@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:realtimechat/helper/mostrar-alerta.dart';
+import 'package:realtimechat/services/auth_services.dart';
 import 'package:realtimechat/widgtes/btn_azul.dart';
 
 import 'package:realtimechat/widgtes/custom_input.dart';
@@ -52,6 +55,7 @@ class __FormState extends State<_Form> {
   final passwordCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authServices = Provider.of<AuthServices>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -72,11 +76,47 @@ class __FormState extends State<_Form> {
           BtnAzul(
               text: 'Ingresar',
               onPressed: () {
-                print(emailCtrl.text);
-                print(passwordCtrl.text);
+                if (authServices.autenticando) {
+                  return null;
+                } else {
+                  getLogin(authServices);
+                }
+                // authServices.autenticando
+                //     ? null
+                //     : () async {
+                //         print('sdfds');
+                //         FocusScope.of(context).unfocus();
+
+                //         final loginOk = await authServices.login(
+                //             emailCtrl.text.trim(), passwordCtrl.text.trim());
+
+                //         if (loginOk) {
+                //           //anevag
+                //           print('mmg');
+                //         } else {
+                //           //mostrar alerta
+                //           mostrarAlert(context, 'Login incorrecto',
+                //               'Revisar crendeciales');
+                //         }
+                // };
               })
         ],
       ),
     );
+  }
+
+  getLogin(AuthServices authServices) async {
+    FocusScope.of(context).unfocus();
+
+    final loginOk = await authServices.login(
+        emailCtrl.text.trim(), passwordCtrl.text.trim());
+
+    if (loginOk) {
+      //anevag
+      Navigator.pushReplacementNamed(context, 'usuarios');
+    } else {
+      //mostrar alerta
+      mostrarAlert(context, 'Login incorrecto', 'Revisar crendeciales');
+    }
   }
 }
