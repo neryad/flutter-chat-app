@@ -40,7 +40,7 @@ class AuthServices with ChangeNotifier {
     this.autenticando = false;
     if (res.statusCode == 200) {
       final loginRes = loginResponseFromJson(res.body);
-      this.usuario = loginRes.userDb;
+      this.usuario = loginRes.usuario;
       await this._guardarToken(loginRes.token!);
       return true;
     } else {
@@ -59,7 +59,7 @@ class AuthServices with ChangeNotifier {
     this.autenticando = false;
     if (res.statusCode == 200) {
       final registerRes = loginResponseFromJson(res.body);
-      this.usuario = registerRes.userDb;
+      this.usuario = registerRes.usuario;
       await this._guardarToken(registerRes.token!);
       return true;
     } else {
@@ -83,7 +83,7 @@ class AuthServices with ChangeNotifier {
     this.autenticando = false;
     if (res.statusCode == 200) {
       final registerRes = loginResponseFromJson(res.body);
-      this.usuario = registerRes.userDb;
+      this.usuario = registerRes.usuario;
       await this._guardarToken(registerRes.token!);
       return true;
     } else {

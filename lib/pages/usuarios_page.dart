@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:realtimechat/models/usuarios.dart';
 import 'package:realtimechat/services/auth_services.dart';
+import 'package:realtimechat/services/chat_services.dart';
+import 'package:realtimechat/services/socket_service.dart';
+import 'package:realtimechat/services/usuarios_services.dart';
 
 class UsuariosPage extends StatefulWidget {
   @override
@@ -14,15 +17,24 @@ class _UsuariosPageState extends State<UsuariosPage> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
-  final usuarios = [
-    Usuario(uid: '1', name: 'Eduardo', email: 'katiro@gamil.com', online: true),
-    Usuario(uid: '2', name: 'Caixto', email: 'Ulloa@gamil.com', online: true),
-    Usuario(uid: '3', name: 'Dayern', email: 'gomez@gamil.com', online: true),
-    Usuario(uid: '4', name: 'Necio', email: 'neio@gamil.com', online: false),
-  ];
+  final usarioServices = UsuarioService();
+  List<Usuario> usuarios = [];
+  @override
+  void initState() {
+    this._cargarUsurios();
+    super.initState();
+  }
+
+  // final usuarios = [
+  //   Usuario(uid: '1', name: 'Eduardo', email: 'katiro@gamil.com', online: true),
+  //   Usuario(uid: '2', name: 'Caixto', email: 'Ulloa@gamil.com', online: true),
+  //   Usuario(uid: '3', name: 'Dayern', email: 'gomez@gamil.com', online: true),
+  //   Usuario(uid: '4', name: 'Necio', email: 'neio@gamil.com', online: false),
+  // ];
   @override
   Widget build(BuildContext context) {
     final authServices = Provider.of<AuthServices>(context);
+    final socketServices = Provider.of<SocketService>(context);
     final usuario = authServices.usuario;
     return Scaffold(
         appBar: AppBar(
@@ -38,6 +50,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
               color: Colors.black,
             ),
             onPressed: () {
+              socketServices.disconnect();
               Navigator.pushReplacementNamed(context, 'login');
               AuthServices.deleteToken();
             },
@@ -45,14 +58,15 @@ class _UsuariosPageState extends State<UsuariosPage> {
           actions: [
             Container(
               margin: EdgeInsets.only(right: 10),
-              child: Icon(
-                Icons.check_circle,
-                color: Colors.blue,
-              ),
-              //     Icon(
-              //   Icons.offline_bolt,
-              //   color: Colors.red,
-              // ),
+              child: (socketServices.serverStatus == ServerStatus.Online)
+                  ? Icon(
+                      Icons.check_circle,
+                      color: Colors.blue,
+                    )
+                  : Icon(
+                      Icons.offline_bolt,
+                      color: Colors.red,
+                    ),
             )
           ],
         ),
@@ -93,12 +107,19 @@ class _UsuariosPageState extends State<UsuariosPage> {
             color: usuario.online! ? Colors.green[300] : Colors.red,
             borderRadius: BorderRadius.circular(100)),
       ),
+      onTap: () {
+        final chatService = Provider.of<ChatService>(context, listen: false);
+        chatService.usuarioPara = usuario;
+        Navigator.pushNamed(context, 'chat');
+      },
     );
   }
 
   _cargarUsurios() async {
+    this.usuarios = await usarioServices.getUsuarios();
+    setState(() {});
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    //await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }

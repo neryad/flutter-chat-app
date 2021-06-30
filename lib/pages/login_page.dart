@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:realtimechat/helper/mostrar-alerta.dart';
 import 'package:realtimechat/services/auth_services.dart';
+import 'package:realtimechat/services/socket_service.dart';
 import 'package:realtimechat/widgtes/btn_azul.dart';
 
 import 'package:realtimechat/widgtes/custom_input.dart';
@@ -55,6 +56,7 @@ class __FormState extends State<_Form> {
   final passwordCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final socketServices = Provider.of<SocketService>(context);
     final authServices = Provider.of<AuthServices>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
@@ -79,7 +81,7 @@ class __FormState extends State<_Form> {
                 if (authServices.autenticando) {
                   return null;
                 } else {
-                  getLogin(authServices);
+                  getLogin(authServices, socketServices);
                 }
                 // authServices.autenticando
                 //     ? null
@@ -105,14 +107,14 @@ class __FormState extends State<_Form> {
     );
   }
 
-  getLogin(AuthServices authServices) async {
+  getLogin(AuthServices authServices, SocketService socketServices) async {
     FocusScope.of(context).unfocus();
 
     final loginOk = await authServices.login(
         emailCtrl.text.trim(), passwordCtrl.text.trim());
 
     if (loginOk) {
-      //anevag
+      socketServices.connect();
       Navigator.pushReplacementNamed(context, 'usuarios');
     } else {
       //mostrar alerta
